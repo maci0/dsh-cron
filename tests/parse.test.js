@@ -38,6 +38,9 @@ test('cron-shaped input that the dialect cannot take is an error, never a guess'
     ['0 0 L * * x', /day-of-month/],
     ['*/0 * * * * x', /minute/],
     ['5-1 * * * * x', /minute/],
+    ['-1 * * * * x', /minute/],
+    ['0 9 * * FUNDAY x', /day-of-week/],
+    ['*/9007199254740992 * * * * x', /minute/],
     ['@reboot x', /@reboot/],
   ]) {
     const result = parse(text)
@@ -46,6 +49,21 @@ test('cron-shaped input that the dialect cannot take is an error, never a guess'
   }
   assert.equal(parse('*/5 * * * *').kind, 'invalid', 'a schedule with nothing to run')
   assert.match(parse('*/5 * * * *').text, /what to run/)
+})
+
+test('cron schedules preserve the prompt including newlines and indentation', () => {
+  const prompt = 'check this script:\n```js\n  run();\n```'
+  for (const prefix of ['0 9 * * *', '@daily', '0 9 * * * Europe/Berlin', '@daily Europe/Berlin']) {
+    const result = parse(`${prefix}\n${prompt}`)
+    assert.equal(result.kind, 'schedule', prefix)
+    assert.equal(result.prompt, prompt, prefix)
+  }
+})
+
+test('intervals must be positive safe integers accepted by the schedule service', () => {
+  for (const prefix of ['in 0 seconds', 'in 99999999999999999999 hours', 'every 99999999999999999999 hours', '99999999999999999999m']) {
+    assert.equal(parse(`${prefix} check`).kind, 'invalid', prefix)
+  }
 })
 
 test('intervals: every N units and the compact /loop form', () => {
@@ -76,6 +94,7 @@ test('daily and weekly wall-clock times', () => {
   expectSchedule('at 7:30pm every day journal', { daily: { time: '19:30:00', time_zone: 'UTC' } }, 'journal')
   expectSchedule('every monday at 9 to review PRs', { weekly: { time: '09:00:00', time_zone: 'UTC', weekdays: [1] } }, 'review PRs')
   expectSchedule('every mon, wed and fri at 18:00 gym', { weekly: { time: '18:00:00', time_zone: 'UTC', weekdays: [1, 3, 5] } }, 'gym')
+  expectSchedule('every mon, wed, and fri at 18:00 gym', { weekly: { time: '18:00:00', time_zone: 'UTC', weekdays: [1, 3, 5] } }, 'gym')
   expectSchedule('weekdays at 8:45am inbox zero', { weekly: { time: '08:45:00', time_zone: 'UTC', weekdays: [1, 2, 3, 4, 5] } }, 'inbox zero')
   expectSchedule('every weekend at 10 plan', { weekly: { time: '10:00:00', time_zone: 'UTC', weekdays: [6, 7] } }, 'plan')
   expectSchedule('every monday to friday at 9 standup', { weekly: { time: '09:00:00', time_zone: 'UTC', weekdays: [1, 2, 3, 4, 5] } }, 'standup')
@@ -118,6 +137,8 @@ test('what no grammar here covers is left to the model', () => {
     'every other thursday after lunch water the plants',
     'twice a day remind me to stretch',
     'every 15 minutes during business hours on weekdays check alerts',
+    'hourly at 9:30 check alerts',
+    'every monday and every friday at 18:00 gym',
     'remind me to drink water',
   ]) {
     assert.equal(parse(text).kind, 'unparsed', text)

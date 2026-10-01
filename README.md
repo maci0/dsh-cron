@@ -32,7 +32,7 @@ Each run arrives in the session as a message with the prompt, the way a
 > row added with `--patch` is an overlay: it disappears at the next start.
 
 ```sh
-dsh plugin --profile web add github:maci0/dsh-cron#v0.1.0 @deepseek-ai/dsh-experimental-schedule-bundle@0.2.0-rc.2
+dsh plugin --profile web add github:maci0/dsh-cron#v0.1.1 @deepseek-ai/dsh-experimental-schedule-bundle@0.2.0-rc.2
 ```
 
 Pin a release tag: a bare `github:` spec floats on `main`. To upgrade, run the same command with the newer tag, then restart `dsh web` (bundle layers compose at boot).
