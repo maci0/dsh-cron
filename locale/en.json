@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Cron",
+    "description": "Run a prompt on a schedule with /cron: cron expressions or plain English like \"every weekday at 9am\", parsed in code."
+  }
+}

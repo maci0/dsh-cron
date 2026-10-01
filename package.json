@@ -1,0 +1,49 @@
+{
+  "name": "dsh-cron",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "description": "/cron for DeepSeek Harness: run a prompt on a cron or plain-English schedule, parsed in code, with the model as the last resort.",
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "compatibility": {
+      "dsh": ">=0.2.0-rc.2 <0.3.0"
+    }
+  },
+  "files": [
+    "icon.svg",
+    "locale/*.json",
+    "index.js",
+    "lib/parse.js",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "bun test"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maci0/dsh-cron.git"
+  },
+  "icon": "./icon.svg",
+  "dependencies": {
+    "@deepseek-ai/dsh-llm": "~0.2.0-rc.2"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.4"
+  }
+}
