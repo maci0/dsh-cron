@@ -32,14 +32,16 @@ Each run arrives in the session as a message with the prompt, the way a
 > row added with `--patch` is an overlay: it disappears at the next start.
 
 ```sh
-dsh plugin --profile web add github:maci0/dsh-cron#v0.1.1 @deepseek-ai/dsh-experimental-schedule-bundle@0.2.0-rc.2
+dsh plugin --profile web add github:maci0/dsh-cron#v0.1.2
 ```
 
-Pin a release tag: a bare `github:` spec floats on `main`. To upgrade, run the same command with the newer tag, then restart `dsh web` (bundle layers compose at boot).
+Pin a release tag: a bare `github:` spec floats on `main`. To upgrade, run the
+same command with the newer tag, then restart `dsh web` (bundle layers compose
+at boot).
 
-The timers belong to the harness schedule service, which ships in the optional
-`@deepseek-ai/dsh-experimental-schedule-bundle` (also on the Plugins page,
-Official group). Without it `/cron` answers an error that names the bundle.
+The timers belong to the harness schedule service. The web profile mounts
+`@deepseek-ai/dsh-schedule` through `@deepseek-ai/dsh-web-app`. A profile
+without that row makes `/cron` answer an error that names the service.
 
 ## How it works
 

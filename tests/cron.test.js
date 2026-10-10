@@ -141,9 +141,9 @@ test('help and an empty argument explain the forms', async () => {
   }
 })
 
-test('without the schedule service, /cron names the bundle that provides it', async () => {
+test('without the schedule service, /cron names the package that provides it', async () => {
   const { run } = mount({ schedule: null })
   const result = await run('every 5 minutes x')
   assert.equal(result.kind, 'error')
-  assert.match(result.text, /dsh-experimental-schedule-bundle/)
+  assert.match(result.text, /@deepseek-ai\/dsh-schedule/)
 })
