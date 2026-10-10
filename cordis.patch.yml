@@ -3,4 +3,4 @@
 # the profile's cordis.patch.yml: insert does not dedupe ids.
 - insert:
     - id: cron
-      name: 'dsh-cron'
+      name: '@maci0/dsh-cron'

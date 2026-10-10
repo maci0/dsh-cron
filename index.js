@@ -21,8 +21,8 @@ import { parseSchedule } from './lib/parse.js'
 export const name = 'cron'
 export const inject = ['commands']
 
-/** The optional bundle that mounts the harness schedule service. */
-const SCHEDULE_BUNDLE = '@deepseek-ai/dsh-experimental-schedule-bundle'
+/** Package the web profile mounts for the harness schedule service. */
+const SCHEDULE_PACKAGE = '@deepseek-ai/dsh-schedule'
 /** Longest task title shown in lists; the service allows 120. */
 const MAX_TITLE = 80
 
@@ -133,7 +133,7 @@ async function cronHandler(invocation, ctx) {
   // say what is missing rather than vanish when it is not mounted.
   const schedule = ctx.get('schedule')
   if (schedule == null) {
-    return { kind: 'error', text: `/cron needs the harness schedule service: enable ${SCHEDULE_BUNDLE} (Plugins page, Official group) or list it in the profile's dsh.profile.bundles.` }
+    return { kind: 'error', text: `/cron needs the harness schedule service. The web profile mounts ${SCHEDULE_PACKAGE} through @deepseek-ai/dsh-web-app.` }
   }
   const sessionId = invocation.agent.session.id
   if (verb === 'list') return list(schedule, sessionId)

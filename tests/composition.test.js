@@ -64,6 +64,6 @@ test('without a schedule service the command still mounts and says what is missi
   const fiber = await ctx.plugin({ name: 'cron', inject, apply }, {})
   const result = await invoke(commands, 'every 5 minutes check')
   assert.equal(result.kind, 'error')
-  assert.match(result.text, /schedule-bundle/)
+  assert.match(result.text, /@deepseek-ai\/dsh-schedule/)
   await fiber.dispose()
 })
