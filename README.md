@@ -32,7 +32,7 @@ Each run arrives in the session as a message with the prompt, the way a
 > row added with `--patch` is an overlay: it disappears at the next start.
 
 ```sh
-dsh plugin --profile web add github:maci0/dsh-cron#v0.1.2
+dsh plugin --profile web add github:maci0/dsh-cron#v0.1.3
 ```
 
 Pin a release tag: a bare `github:` spec floats on `main`. To upgrade, run the
