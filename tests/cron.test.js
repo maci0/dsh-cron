@@ -141,6 +141,28 @@ test('help and an empty argument explain the forms', async () => {
   }
 })
 
+test('malformed management commands never ask the model to create schedules', async () => {
+  const { run, followups, schedule } = mount()
+  for (const input of ['list all', 'help schedules', 'delete', 'delete 1 extra']) {
+    assert.equal((await run(input)).kind, 'error', input)
+  }
+  assert.equal(followups.length, 0)
+  assert.equal(schedule.records.length, 0)
+})
+
+test('numbered deletes keep targeting the last list, even after its first schedule disappears', async () => {
+  const { run, schedule } = mount()
+  await run('every 5 minutes a')
+  await run('every 10 minutes b')
+  await run('every 15 minutes c')
+  assert.equal((await run('delete 1')).kind, 'error', 'list first instead of guessing a number')
+  await run('list')
+  schedule.records.shift()
+  assert.match((await run('delete 2')).text, /Deleted "b"/)
+  assert.deepEqual(schedule.records.map(record => record.title), ['c'])
+  assert.equal((await run('delete 2')).kind, 'error', 'never reinterpret the same number as another job')
+})
+
 test('without the schedule service, /cron names the package that provides it', async () => {
   const { run } = mount({ schedule: null })
   const result = await run('every 5 minutes x')

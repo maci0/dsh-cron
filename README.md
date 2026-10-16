@@ -25,6 +25,11 @@ to the model.
 Each run arrives in the session as a message with the prompt, the way a
 `/loop` round does.
 
+Numbered deletes refer to the last `/cron list` shown in that session. List
+again after a harness restart, or delete by the schedule id directly.
+`list`, `help`, and `delete` are management verbs. Put timing first when the
+scheduled task starts with one of those words, such as `/cron every day at 9 list open PRs`.
+
 ## Install
 
 > **Install it as a bundle.** `dsh plugin add …` mounts the row from the
@@ -32,12 +37,11 @@ Each run arrives in the session as a message with the prompt, the way a
 > row added with `--patch` is an overlay: it disappears at the next start.
 
 ```sh
-dsh plugin --profile web add github:maci0/dsh-cron#v0.1.3
+dsh plugin --profile web add --save-exact @maci0/dsh-cron@0.2.0
 ```
 
-Pin a release tag: a bare `github:` spec floats on `main`. To upgrade, run the
-same command with the newer tag, then restart `dsh web` (bundle layers compose
-at boot).
+Pin an exact npm version. To upgrade, run the same command with the newer
+version, then restart `dsh web` (bundle layers compose at boot).
 
 The timers belong to the harness schedule service. The web profile mounts
 `@deepseek-ai/dsh-schedule` through `@deepseek-ai/dsh-web-app`. A profile

@@ -99,8 +99,9 @@ async function create(schedule, invocation, text) {
   }
 }
 
-async function list(schedule, sessionId) {
+async function list(schedule, sessionId, listed) {
   const records = await schedule.list({ sessionId })
+  listed.set(sessionId, records.map(record => record.id))
   if (records.length === 0) return { kind: 'success', text: 'No schedules in this session.' }
   const timeZone = hostTimeZone()
   return {
@@ -109,11 +110,17 @@ async function list(schedule, sessionId) {
   }
 }
 
-async function remove(schedule, sessionId, target) {
+async function remove(schedule, sessionId, target, listed) {
+  let id = target
+  if (/^\d+$/u.test(target)) {
+    const choices = listed.get(sessionId)
+    if (choices === undefined) return { kind: 'error', text: 'Run /cron list before deleting by number.' }
+    id = choices[Number(target) - 1]
+  }
   const records = await schedule.list({ sessionId })
   const chosen = target === 'all'
     ? records
-    : records.filter((record, index) => record.id === target || String(index + 1) === target)
+    : records.filter(record => record.id === id)
   if (chosen.length === 0) return { kind: 'error', text: `No schedule "${target}" in this session; /cron list shows them.` }
   const deleted = []
   for (const record of chosen) {
@@ -125,7 +132,7 @@ async function remove(schedule, sessionId, target) {
   return { kind: 'success', text: `Deleted "${deleted[0].title}".` }
 }
 
-async function cronHandler(invocation, ctx) {
+async function cronHandler(invocation, ctx, listed) {
   const input = invocation.rawInput.trim()
   const verb = input.toLowerCase()
   if (verb === '' || verb === 'help') return { kind: 'success', text: USAGE }
@@ -136,18 +143,22 @@ async function cronHandler(invocation, ctx) {
     return { kind: 'error', text: `/cron needs the harness schedule service. The web profile mounts ${SCHEDULE_PACKAGE} through @deepseek-ai/dsh-web-app.` }
   }
   const sessionId = invocation.agent.session.id
-  if (verb === 'list') return list(schedule, sessionId)
+  if (verb === 'list') return list(schedule, sessionId, listed)
   const deleteMatch = /^delete\s+(\S+)$/iu.exec(input)
-  if (deleteMatch !== null) return remove(schedule, sessionId, deleteMatch[1].toLowerCase() === 'all' ? 'all' : deleteMatch[1])
+  if (deleteMatch !== null) return remove(schedule, sessionId, deleteMatch[1].toLowerCase() === 'all' ? 'all' : deleteMatch[1], listed)
+  if (/^(?:list|help|delete)(?:\s|$)/iu.test(input)) return { kind: 'error', text: USAGE }
   return create(schedule, invocation, input)
 }
 
 export function apply(ctx) {
+  // Keep list numbers tied to the ids the user saw, even when schedules change.
+  const listed = new Map()
+  ctx.on?.('session/disposed', (session) => { listed.delete(session.id) })
   ctx.effect(() => ctx.commands.register({
     definitionId: 'dsh-cron:cron',
     name: 'cron',
     description: 'Run a prompt on a schedule: /cron <cron expression or phrase> <prompt>, /cron list, /cron delete <n|id|all>',
     input: { hint: '<schedule> <prompt> | list | delete <n|id|all> | help' },
-    handler: (invocation) => cronHandler(invocation, ctx),
+    handler: (invocation) => cronHandler(invocation, ctx, listed),
   }))
 }
